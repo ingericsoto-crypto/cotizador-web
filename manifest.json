@@ -1,0 +1,15 @@
+{
+  "name": "Cotizador de Bolsas",
+  "short_name": "Cotizador",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f4",
+  "theme_color": "#28a745",
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
