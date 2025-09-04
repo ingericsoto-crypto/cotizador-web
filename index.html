@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotizador de Bolsas Profesional</title>
+    <title>Cotizador de Asfata YA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #2e7d32;
-            --primary-dark: #1b5e20;
-            --primary-light: #4caf50;
-            --secondary: #ff9800;
-            --text: #263238;
-            --text-light: #78909c;
-            --background: #f5f9f6;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --background: #f9fafb;
             --card-bg: #ffffff;
-            --border: #dce7df;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --error: #f44336;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
         }
         
         * {
@@ -28,71 +33,137 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--background) 0%, #e4efe9 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #f3f4f6 100%);
             color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1300px;
             width: 100%;
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius);
+            color: white;
+            box-shadow: var(--shadow);
+            width: 100%;
         }
         
         header h1 {
-            font-size: 2.5rem;
-            color: var(--primary-dark);
-            margin-bottom: 10px;
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
         
         header p {
-            color: var(--text-light);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .app-container {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
-            justify-content: center;
-        }
-        
-        .cotizador {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
         }
         
-        .section-title {
-            font-size: 1.3rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 2px solid var(--border);
         }
         
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .info-icon {
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--text);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
         
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
             color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .label-info {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: normal;
         }
         
         .input-with-icon {
@@ -107,49 +178,71 @@
             color: var(--primary);
         }
         
-        .input-with-icon input {
+        .input-with-icon input, .input-with-icon select {
             padding-left: 45px;
         }
         
-        input {
+        input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 18px;
             border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s;
+            background: white;
         }
         
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
         
         .range-container {
-            margin-top: 10px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
         .range-container input[type="range"] {
+            flex: 1;
             padding: 0;
-            height: 6px;
+            height: 8px;
+            border: none;
+            border-radius: 4px;
+            background: var(--border);
+        }
+        
+        .range-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+            background: #eff6ff;
+            padding: 4px 10px;
+            border-radius: 20px;
         }
         
         .button-group {
             display: flex;
             gap: 15px;
-            margin-top: 25px;
+            margin-top: 30px;
         }
         
         button {
             flex: 1;
-            padding: 14px;
+            padding: 16px;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-primary {
@@ -160,33 +253,66 @@
         .btn-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
         }
         
         .btn-secondary {
-            background: #f1f8e9;
+            background: #eff6ff;
             color: var(--primary);
-            border: 2px solid var(--border);
+            border: 2px solid #bfdbfe;
         }
         
         .btn-secondary:hover {
-            background: #e8f5e9;
+            background: #dbeafe;
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-ticket {
+            background: #7e22ce;
+            color: white;
+        }
+        
+        .btn-ticket:hover {
+            background: #6b21a8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(126, 34, 206, 0.3);
         }
         
         .resultado {
             margin-top: 30px;
-            background: #e8f5e9;
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 5px solid var(--success);
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            padding: 28px;
+            border-radius: var(--radius);
+            border-left: 5px solid var(--primary);
         }
         
         .result-line {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #c8e6c9;
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #bfdbfe;
         }
         
         .result-line:last-child {
@@ -194,137 +320,555 @@
             margin-bottom: 0;
             padding-bottom: 0;
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--primary-dark);
         }
         
-        .summary {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 640px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
+            background: #f9fafb;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
         }
         
         .summary-title {
             font-weight: 600;
             color: var(--text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .summary-value {
             color: var(--primary);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.2rem;
         }
         
         .features {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 25px;
+            margin-top: 30px;
         }
         
         .feature {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: #e8f5e9;
-            padding: 12px 15px;
+            gap: 12px;
+            background: #f0fdf4;
+            padding: 15px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            border: 1px solid #bbf7d0;
         }
         
         .feature i {
             color: var(--success);
+            font-size: 1.2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .history-container {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .history-item:hover {
+            background: #f9fafb;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-details {
+            flex: 1;
+        }
+        
+        .history-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .history-desc {
+            font-weight: 600;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .history-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-light);
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        
+        .history-action-btn:hover {
+            background: #f3f4f6;
+            color: var(--primary);
+        }
+        
+        .print-container {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid var(--border);
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .export-btn {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .export-btn:hover {
+            background: #f9fafb;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .export-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
         }
         
         footer {
-            margin-top: 40px;
+            margin-top: 50px;
             text-align: center;
             color: var(--text-light);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            width: 100%;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 18px 24px;
+            border-radius: 10px;
+            background: var(--success);
+            color: white;
+            box-shadow: var(--shadow);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: var(--error);
+        }
+        
+        .notification.warning {
+            background: var(--warning);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .badge-error {
+            background: var(--error);
+            color: white;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        .discount-tiers {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .discount-tier {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+        }
+        
+        .discount-tier.active {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+        
+        .discount-amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .discount-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        .save-load-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
         }
         
         @media (max-width: 768px) {
             .app-container {
-                flex-direction: column;
-            }
-            
-            .cotizador, .summary {
-                max-width: 100%;
+                grid-template-columns: 1fr;
             }
             
             header h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .discount-tiers {
+                grid-template-columns: 1fr;
+            }
+            
+            .save-load-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+        }
+        
+        @media print {
+            body, .container {
+                padding: 0;
+                background: white;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .button-group, .tabs, .print-container, footer,
+            .export-options, .history-actions {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
+    </div>
+
     <div class="container">
         <header>
-            <h1>Cotizador de Bolsas Profesional</h1>
-            <p>Calcula el costo total de tus bolsas incluyendo impuestos y descuentos</p>
+            <h1><i class=></i> Cotizador de Asfata YA</h1>
+            <p>Calcula el costo total de tus bolsas con descuentos por volumen, impuestos y costos adicionales</p>
         </header>
         
         <div class="app-container">
-            <div class="cotizador">
-                <h2 class="section-title">Datos de Cotización</h2>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-calculator"></i> Calculadora</h2>
+                </div>
                 
-                <div class="input-group">
-                    <label for="cantidad">Cantidad de bolsas</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-shopping-bag"></i>
-                        <input type="number" id="cantidad" value="100" min="1">
+                <div class="tabs">
+                    <div class="tab active" data-tab="basic">Básico</div>
+                    <div class="tab" data-tab="advanced">Avanzado</div>
+                    <div class="tab" data-tab="history">Historial</div>
+                </div>
+                
+                <div class="tab-content active" id="basic-tab">
+                    <div class="input-group">
+                        <label for="cantidad">
+                            Cantidad de bolsas
+                            <span class="label-info">Descuentos aplicados automáticamente</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                            <input type="number" id="cantidad" value="100" min="1">
+                        </div>
+                        <div class="range-container">
+                            <input type="range" id="cantidad-range" min="1" max="1000" value="100">
+                            <span class="range-value" id="cantidad-value">100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="cantidad-progress" style="width: 10%;"></div>
+                        </div>
                     </div>
-                    <div class="range-container">
-                        <input type="range" id="cantidad-range" min="1" max="1000" value="100">
+                    
+                    <div class="input-group">
+                        <label for="precio">
+                            Precio unitario ($)
+                            <span class="label-info">Precio antes de descuentos</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="number" id="precio" value="380" min="1" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="descuento">
+                            Descuento adicional (%)
+                            <span class="label-info">Descuento especial adicional</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-percent"></i>
+                            <input type="number" id="descuento" value="0" min="0" max="100">
+                        </div>
+                        <div class="range-container">
+                            <input type="range" id="descuento-range" min="0" max="50" value="0">
+                            <span class="range-value" id="descuento-value">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="iva">IVA (%)</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-receipt"></i>
+                            <input type="number" id="iva" value="16" min="0" max="30">
+                        </div>
+                        <div class="range-container">
+                            <input type="range" id="iva-range" min="0" max="30" value="16">
+                            <span class="range-value" id="iva-value">16%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="discount-tiers">
+                        <div class="discount-tier" data-min="1" data-max="50" data-discount="0">
+                            <div class="discount-amount">0% desc</div>
+                            <div class="discount-desc">1-50 unidades</div>
+                        </div>
+                        <div class="discount-tier" data-min="51" data-max="100" data-discount="5">
+                            <div class="discount-amount">5% desc</div>
+                            <div class="discount-desc">51-100 unidades</div>
+                        </div>
+                        <div class="discount-tier" data-min="101" data-max="1000" data-discount="10">
+                            <div class="discount-amount">10% desc</div>
+                            <div class="discount-desc">101+ unidades</div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="calcular()">
+                            <i class="fas fa-calculator"></i> Calcular
+                        </button>
+                        <button class="btn-secondary" onclick="limpiar()">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
                     </div>
                 </div>
                 
-                <div class="input-group">
-                    <label for="precio">Precio unitario ($)</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-tag"></i>
-                        <input type="number" id="precio" value="380" min="1" step="0.01">
+                <div class="tab-content" id="advanced-tab">
+                    <div class="input-group">
+                        <label for="tipo-bolsa">Tipo de bolsa</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                            <select id="tipo-bolsa">
+                                <option value="380">Bolsa estándar ($380)</option>
+                                <option value="550">Bolsa premium ($550)</option>
+                                <option value="custom">Personalizado (ingresar precio)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="costo-extra">
+                            Costos adicionales ($)
+                            <span class="label-info">Personalización, logotipo, etc.</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-plus-circle"></i>
+                            <input type="number" id="costo-extra" value="0" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="envio">
+                            Costo de envío ($)
+                            <span class="label-info">Costo de transporte</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-truck"></i>
+                            <input type="number" id="envio" value="0" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="moneda">Moneda</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <select id="moneda">
+                                <option value="MXN">Peso Mexicano (MXN)</option>
+                                <option value="USD">Dólar Americano (USD)</option>
+                                <option value="EUR">Euro (EUR)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="save-load-container">
+                        <button class="btn-accent" onclick="guardarCotizacion()">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <button class="btn-warning" onclick="cargarCotizacion()">
+                            <i class="fas fa-folder-open"></i> Cargar
+                        </button>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="calcular()">
+                            <i class="fas fa-calculator"></i> Calcular Completo
+                        </button>
                     </div>
                 </div>
                 
-                <div class="input-group">
-                    <label for="descuento">Descuento (%)</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-percent"></i>
-                        <input type="number" id="descuento" value="0" min="0" max="100">
+                <div class="tab-content" id="history-tab">
+                    <div class="history-container" id="history-container">
+                        <p id="empty-history">No hay cotizaciones guardadas.</p>
                     </div>
-                    <div class="range-container">
-                        <input type="range" id="descuento-range" min="0" max="50" value="0">
+                    
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="limpiarHistorial()">
+                            <i class="fas fa-trash"></i> Limpiar Historial
+                        </button>
                     </div>
-                </div>
-                
-                <div class="input-group">
-                    <label for="iva">IVA (%)</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-receipt"></i>
-                        <input type="number" id="iva" value="16" min="0" max="30">
+                    
+                    <div class="export-options">
+                        <button class="export-btn" onclick="exportarPDF()">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="export-btn" onclick="exportarExcel()">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button class="export-btn" onclick="exportarJSON()">
+                            <i class="fas fa-file-code"></i> JSON
+                        </button>
                     </div>
-                    <div class="range-container">
-                        <input type="range" id="iva-range" min="0" max="30" value="16">
-                    </div>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn-primary" onclick="calcular()">
-                        <i class="fas fa-calculator"></i> Calcular
-                    </button>
-                    <button class="btn-secondary" onclick="limpiar()">
-                        <i class="fas fa-eraser"></i> Limpiar
-                    </button>
                 </div>
                 
                 <div class="resultado" id="resultado">
@@ -333,41 +877,95 @@
                         <span id="subtotal">$0.00</span>
                     </div>
                     <div class="result-line">
-                        <span>Descuento:</span>
-                        <span id="descuento-result">$0.00</span>
+                        <span>Descuento por volumen:</span>
+                        <span id="descuento-volumen">$0.00 (0%)</span>
                     </div>
                     <div class="result-line">
-                        <span>IVA (<span id="iva-value">16</span>%):</span>
+                        <span>Descuento adicional:</span>
+                        <span id="descuento-adicional">$0.00 (0%)</span>
+                    </div>
+                    <div class="result-line">
+                        <span>IVA (<span id="iva-percent">16</span>%):</span>
                         <span id="iva-result">$0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>Costos adicionales:</span>
+                        <span id="costos-extra-result">$0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>Envío:</span>
+                        <span id="envio-result">$0.00</span>
                     </div>
                     <div class="result-line">
                         <span>Total:</span>
                         <span id="total">$0.00</span>
                     </div>
                 </div>
+                
+                <div class="print-container">
+                    <button class="btn-ticket" onclick="generarTicket()">
+                        <i class="fas fa-ticket-alt"></i> Generar Ticket
+                    </button>
+                    <button class="btn-accent" onclick="imprimirCotizacion()">
+                        <i class="fas fa-print"></i> Imprimir Cotización
+                    </button>
+                </div>
             </div>
             
-            <div class="summary">
-                <h2 class="section-title">Resumen de Cotización</h2>
-                
-                <div class="summary-item">
-                    <span class="summary-title">Cantidad:</span>
-                    <span class="summary-value" id="summary-cantidad">100 bolsas</span>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-chart-pie"></i> Resumen de Cotización</h2>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle info-icon"></i>
+                        <span class="tooltip-text">Resumen detallado de tu cotización actual</span>
+                    </div>
                 </div>
                 
-                <div class="summary-item">
-                    <span class="summary-title">Precio unitario:</span>
-                    <span class="summary-value" id="summary-precio">$380.00</span>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-shopping-bag"></i> Cantidad</div>
+                        <div class="summary-value" id="summary-cantidad">100 bolsas</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-tag"></i> Tipo</div>
+                        <div class="summary-value" id="summary-tipo">bolsa estándar</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-money-bill-wave"></i> Precio unitario</div>
+                        <div class="summary-value" id="summary-precio">$380.00</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-percent"></i> Descuento por volumen</div>
+                        <div class="summary-value" id="summary-descuento-vol">0% ($0.00)</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-tags"></i> Descuento adicional</div>
+                        <div class="summary-value" id="summary-descuento-adic">0% ($0.00)</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-receipt"></i> IVA aplicado</div>
+                        <div class="summary-value" id="summary-iva">16%</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-plus-circle"></i> Costos adicionales</div>
+                        <div class="summary-value" id="summary-extra">$0.00</div>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <div class="summary-title"><i class="fas fa-truck"></i> Envío</div>
+                        <div class="summary-value" id="summary-envio">$0.00</div>
+                    </div>
                 </div>
                 
-                <div class="summary-item">
-                    <span class="summary-title">Descuento aplicado:</span>
-                    <span class="summary-value" id="summary-descuento">0% ($0.00)</span>
-                </div>
-                
-                <div class="summary-item">
-                    <span class="summary-title">IVA aplicado:</span>
-                    <span class="summary-value" id="summary-iva">16%</span>
+                <div class="summary-item" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--border);">
+                    <div class="summary-title"><i class="fas fa-file-invoice-dollar"></i> Total</div>
+                    <div class="summary-value" id="summary-total">$0.00</div>
                 </div>
                 
                 <div class="features">
@@ -377,104 +975,750 @@
                     </div>
                     <div class="feature">
                         <i class="fas fa-check-circle"></i>
-                        <span>Controles deslizantes</span>
+                        <span>Descuentos por volumen</span>
                     </div>
                     <div class="feature">
                         <i class="fas fa-check-circle"></i>
-                        <span>Diseño responsive</span>
+                        <span>Múltiples formatos de exportación</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Generación de tickets</span>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>© 2023 Cotizador de Bolsas Profesional - Todos los derechos reservados</p>
+            <p>© 2025 Cotizador de Bolsa Asfalta YA - Todos los derechos reservados</p>
         </footer>
     </div>
 
     <script>
-        // Sincronizar inputs numéricos con los range sliders
-        document.getElementById('cantidad-range').addEventListener('input', function() {
-            document.getElementById('cantidad').value = this.value;
+        // Variables globales
+        let cotizaciones = JSON.parse(localStorage.getItem('cotizaciones')) || [];
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarAplicacion();
             calcular();
         });
         
-        document.getElementById('cantidad').addEventListener('input', function() {
-            document.getElementById('cantidad-range').value = this.value;
-            calcular();
-        });
+        function inicializarAplicacion() {
+            // Configurar event listeners para los tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Desactivar todos los tabs
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                    
+                    // Activar el tab seleccionado
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                });
+            });
+            
+            // Configurar event listeners para los range inputs
+            configurarRango('cantidad');
+            configurarRango('descuento');
+            configurarRango('iva');
+            
+            // Event listener para el tipo de bolsa
+            document.getElementById('tipo-bolsa').addEventListener('change', function() {
+                if (this.value !== 'custom') {
+                    document.getElementById('precio').value = this.value;
+                }
+                calcular();
+            });
+            
+            // Event listeners para costos adicionales
+            document.getElementById('costo-extra').addEventListener('input', calcular);
+            document.getElementById('envio').addEventListener('input', calcular);
+            document.getElementById('moneda').addEventListener('change', calcular);
+            
+            // Configurar niveles de descuento
+            document.querySelectorAll('.discount-tier').forEach(tier => {
+                tier.addEventListener('click', function() {
+                    const min = this.getAttribute('data-min');
+                    const max = this.getAttribute('data-max');
+                    const discount = this.getAttribute('data-discount');
+                    
+                    document.getElementById('cantidad').value = min;
+                    document.getElementById('cantidad-range').value = min;
+                    document.getElementById('cantidad-value').textContent = min;
+                    document.getElementById('descuento').value = discount;
+                    document.getElementById('descuento-range').value = discount;
+                    document.getElementById('descuento-value').textContent = `${discount}%`;
+                    
+                    document.querySelectorAll('.discount-tier').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    calcular();
+                });
+            });
+            
+            // Cargar historial si existe
+            cargarHistorial();
+            
+            // Agregar algunas cotizaciones de ejemplo si no hay datos
+            if (cotizaciones.length === 0) {
+                agregarEjemplos();
+            }
+        }
         
-        document.getElementById('descuento-range').addEventListener('input', function() {
-            document.getElementById('descuento').value = this.value;
-            calcular();
-        });
+        function agregarEjemplos() {
+            const ejemplos = [
+                {
+                    fecha: new Date().toLocaleString(),
+                    cantidad: "100",
+                    tipo: "Bolsa estándar ($380)",
+                    precio: "380",
+                    descuento: "5",
+                    iva: "16",
+                    costoExtra: "0",
+                    envio: "150",
+                    moneda: "MXN",
+                    total: "$44,946.00"
+                },
+                {
+                    fecha: new Date(Date.now() - 86400000).toLocaleString(),
+                    cantidad: "50",
+                    tipo: "Papel reciclado ($450)",
+                    precio: "450",
+                    descuento: "0",
+                    iva: "16",
+                    costoExtra: "50",
+                    envio: "100",
+                    moneda: "MXN",
+                    total: "$26,820.00"
+                },
+                {
+                    fecha: new Date(Date.now() - 172800000).toLocaleString(),
+                    cantidad: "200",
+                    tipo: "Tela reusable ($620)",
+                    precio: "620",
+                    descuento: "10",
+                    iva: "16",
+                    costoExtra: "100",
+                    envio: "200",
+                    moneda: "MXN",
+                    total: "$130,166.40"
+                }
+            ];
+            
+            cotizaciones = ejemplos;
+            localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+            cargarHistorial();
+        }
         
-        document.getElementById('descuento').addEventListener('input', function() {
-            document.getElementById('descuento-range').value = this.value;
-            calcular();
-        });
+        function configurarRango(id) {
+            const range = document.getElementById(`${id}-range`);
+            const input = document.getElementById(id);
+            const value = document.getElementById(`${id}-value`);
+            
+            range.addEventListener('input', function() {
+                input.value = this.value;
+                value.textContent = id === 'cantidad' ? this.value : `${this.value}%`;
+                
+                if (id === 'cantidad') {
+                    actualizarProgreso(this.value);
+                    actualizarDescuentoPorVolumen(this.value);
+                }
+                
+                calcular();
+            });
+            
+            input.addEventListener('input', function() {
+                range.value = this.value;
+                value.textContent = id === 'cantidad' ? this.value : `${this.value}%`;
+                
+                if (id === 'cantidad') {
+                    actualizarProgreso(this.value);
+                    actualizarDescuentoPorVolumen(this.value);
+                }
+                
+                calcular();
+            });
+        }
         
-        document.getElementById('iva-range').addEventListener('input', function() {
-            document.getElementById('iva').value = this.value;
-            calcular();
-        });
+        function actualizarProgreso(valor) {
+            const porcentaje = (valor / 1000) * 100;
+            document.getElementById('cantidad-progress').style.width = `${porcentaje}%`;
+        }
         
-        document.getElementById('iva').addEventListener('input', function() {
-            document.getElementById('iva-range').value = this.value;
-            calcular();
-        });
+        function actualizarDescuentoPorVolumen(cantidad) {
+            const tiers = document.querySelectorAll('.discount-tier');
+            let activeTier = null;
+            
+            tiers.forEach(tier => {
+                const min = parseInt(tier.getAttribute('data-min'));
+                const max = parseInt(tier.getAttribute('data-max'));
+                
+                if (cantidad >= min && cantidad <= max) {
+                    activeTier = tier;
+                }
+                tier.classList.remove('active');
+            });
+            
+            if (activeTier) {
+                activeTier.classList.add('active');
+            }
+        }
         
         function calcular() {
+            // Obtener valores de los inputs
             let cantidad = parseFloat(document.getElementById('cantidad').value);
             let precio = parseFloat(document.getElementById('precio').value);
-            let descuentoPorcentaje = parseFloat(document.getElementById('descuento').value);
+            let descuentoAdicional = parseFloat(document.getElementById('descuento').value);
             let ivaPorcentaje = parseFloat(document.getElementById('iva').value);
+            let costoExtra = parseFloat(document.getElementById('costo-extra').value) || 0;
+            let envio = parseFloat(document.getElementById('envio').value) || 0;
             
             // Validaciones
             if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
             if (isNaN(precio) || precio < 0) precio = 0;
-            if (isNaN(descuentoPorcentaje) || descuentoPorcentaje < 0) descuentoPorcentaje = 0;
-            if (descuentoPorcentaje > 100) descuentoPorcentaje = 100;
+            if (isNaN(descuentoAdicional) || descuentoAdicional < 0) descuentoAdicional = 0;
+            if (descuentoAdicional > 100) descuentoAdicional = 100;
             if (isNaN(ivaPorcentaje) || ivaPorcentaje < 0) ivaPorcentaje = 0;
             if (ivaPorcentaje > 30) ivaPorcentaje = 30;
+            if (isNaN(costoExtra) || costoExtra < 0) costoExtra = 0;
+            if (isNaN(envio) || envio < 0) envio = 0;
+            
+            // Calcular descuento por volumen
+            let descuentoVolumen = 0;
+            if (cantidad > 100) {
+                descuentoVolumen = 10;
+            } else if (cantidad > 50) {
+                descuentoVolumen = 5;
+            }
             
             // Cálculos
             let subtotal = cantidad * precio;
-            let descuento = subtotal * (descuentoPorcentaje / 100);
-            let subtotalConDescuento = subtotal - descuento;
+            let descuentoVolumenMonto = subtotal * (descuentoVolumen / 100);
+            let descuentoAdicionalMonto = subtotal * (descuentoAdicional / 100);
+            let subtotalConDescuento = subtotal - descuentoVolumenMonto - descuentoAdicionalMonto;
             let iva = subtotalConDescuento * (ivaPorcentaje / 100);
-            let total = subtotalConDescuento + iva;
+            let total = subtotalConDescuento + iva + costoExtra + envio;
+            
+            // Obtener moneda seleccionada
+            const moneda = document.getElementById('moneda').value;
+            const simboloMoneda = obtenerSimboloMoneda(moneda);
             
             // Actualizar UI
-            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('descuento-result').textContent = `-$${descuento.toFixed(2)}`;
-            document.getElementById('iva-value').textContent = ivaPorcentaje;
-            document.getElementById('iva-result').textContent = `$${iva.toFixed(2)}`;
-            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `${simboloMoneda}${subtotal.toFixed(2)}`;
+            document.getElementById('descuento-volumen').textContent = `${simboloMoneda}${descuentoVolumenMonto.toFixed(2)} (${descuentoVolumen}%)`;
+            document.getElementById('descuento-adicional').textContent = `${simboloMoneda}${descuentoAdicionalMonto.toFixed(2)} (${descuentoAdicional}%)`;
+            document.getElementById('iva-percent').textContent = ivaPorcentaje;
+            document.getElementById('iva-result').textContent = `${simboloMoneda}${iva.toFixed(2)}`;
+            document.getElementById('costos-extra-result').textContent = `${simboloMoneda}${costoExtra.toFixed(2)}`;
+            document.getElementById('envio-result').textContent = `${simboloMoneda}${envio.toFixed(2)}`;
+            document.getElementById('total').textContent = `${simboloMoneda}${total.toFixed(2)}`;
             
             // Actualizar resumen
+            const tipoBolsaSelect = document.getElementById('tipo-bolsa');
+            const tipoBolsaText = tipoBolsaSelect.options[tipoBolsaSelect.selectedIndex].text;
+            
             document.getElementById('summary-cantidad').textContent = `${cantidad} bolsas`;
-            document.getElementById('summary-precio').textContent = `$${precio.toFixed(2)}`;
-            document.getElementById('summary-descuento').textContent = `${descuentoPorcentaje}% ($${descuento.toFixed(2)})`;
+            document.getElementById('summary-tipo').textContent = tipoBolsaText.split(' (')[0];
+            document.getElementById('summary-precio').textContent = `${simboloMoneda}${precio.toFixed(2)}`;
+            document.getElementById('summary-descuento-vol').textContent = `${descuentoVolumen}% (${simboloMoneda}${descuentoVolumenMonto.toFixed(2)})`;
+            document.getElementById('summary-descuento-adic').textContent = `${descuentoAdicional}% (${simboloMoneda}${descuentoAdicionalMonto.toFixed(2)})`;
             document.getElementById('summary-iva').textContent = `${ivaPorcentaje}%`;
+            document.getElementById('summary-extra').textContent = `${simboloMoneda}${costoExtra.toFixed(2)}`;
+            document.getElementById('summary-envio').textContent = `${simboloMoneda}${envio.toFixed(2)}`;
+            document.getElementById('summary-total').textContent = `${simboloMoneda}${total.toFixed(2)}`;
+            
+            // Actualizar progreso
+            actualizarProgreso(cantidad);
+            actualizarDescuentoPorVolumen(cantidad);
+        }
+        
+        function obtenerSimboloMoneda(moneda) {
+            switch(moneda) {
+                case 'USD': return '$';
+                case 'EUR': return '€';
+                default: return '$';
+            }
         }
         
         function limpiar() {
             document.getElementById('cantidad').value = 100;
             document.getElementById('cantidad-range').value = 100;
+            document.getElementById('cantidad-value').textContent = '100';
+            
             document.getElementById('precio').value = 380;
+            
             document.getElementById('descuento').value = 0;
             document.getElementById('descuento-range').value = 0;
+            document.getElementById('descuento-value').textContent = '0%';
+            
             document.getElementById('iva').value = 16;
             document.getElementById('iva-range').value = 16;
+            document.getElementById('iva-value').textContent = '16%';
+            
+            document.getElementById('costo-extra').value = 0;
+            document.getElementById('envio').value = 0;
+            
+            document.getElementById('tipo-bolsa').value = 380;
+            document.getElementById('moneda').value = 'MXN';
             
             calcular();
+            
+            mostrarNotificación('Formulario limpiado correctamente');
         }
         
-        // Inicializar cálculo al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
+        function guardarCotizacion() {
+            const cotizacion = {
+                fecha: new Date().toLocaleString(),
+                cantidad: document.getElementById('cantidad').value,
+                tipo: document.getElementById('tipo-bolsa').options[document.getElementById('tipo-bolsa').selectedIndex].text,
+                precio: document.getElementById('precio').value,
+                descuentoVolumen: document.querySelector('.discount-tier.active')?.getAttribute('data-discount') || 0,
+                descuentoAdicional: document.getElementById('descuento').value,
+                iva: document.getElementById('iva').value,
+                costoExtra: document.getElementById('costo-extra').value,
+                envio: document.getElementById('envio').value,
+                moneda: document.getElementById('moneda').value,
+                total: document.getElementById('total').textContent
+            };
+            
+            cotizaciones.push(cotizacion);
+            localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+            
+            cargarHistorial();
+            mostrarNotificación('Cotización guardada correctamente');
+        }
+        
+        function cargarCotizacion() {
+            if (cotizaciones.length === 0) {
+                mostrarNotificación('No hay cotizaciones guardadas', 'warning');
+                return;
+            }
+            
+            // Aquí implementaríamos un modal para seleccionar qué cotización cargar
+            // Por ahora cargamos la más reciente
+            const ultima = cotizaciones[cotizaciones.length - 1];
+            
+            document.getElementById('cantidad').value = ultima.cantidad;
+            document.getElementById('cantidad-range').value = ultima.cantidad;
+            document.getElementById('cantidad-value').textContent = ultima.cantidad;
+            
+            document.getElementById('precio').value = ultima.precio;
+            
+            document.getElementById('descuento').value = ultima.descuentoAdicional;
+            document.getElementById('descuento-range').value = ultima.descuentoAdicional;
+            document.getElementById('descuento-value').textContent = `${ultima.descuentoAdicional}%`;
+            
+            document.getElementById('iva').value = ultima.iva;
+            document.getElementById('iva-range').value = ultima.iva;
+            document.getElementById('iva-value').textContent = `${ultima.iva}%`;
+            
+            document.getElementById('costo-extra').value = ultima.costoExtra;
+            document.getElementById('envio').value = ultima.envio;
+            
+            document.getElementById('moneda').value = ultima.moneda;
+            
+            // Seleccionar el tipo de bolsa basado en el precio
+            const tipoBolsaSelect = document.getElementById('tipo-bolsa');
+            for (let i = 0; i < tipoBolsaSelect.options.length; i++) {
+                if (tipoBolsaSelect.options[i].value === ultima.precio) {
+                    tipoBolsaSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            
             calcular();
-        });
+            mostrarNotificación('Cotización cargada correctamente');
+        }
+        
+        function cargarHistorial() {
+            const historyContainer = document.getElementById('history-container');
+            const emptyHistory = document.getElementById('empty-history');
+            
+            if (cotizaciones.length === 0) {
+                emptyHistory.style.display = 'block';
+                historyContainer.innerHTML = '<p id="empty-history">No hay cotizaciones guardadas.</p>';
+                return;
+            }
+            
+            emptyHistory.style.display = 'none';
+            
+            let historyHTML = '';
+            cotizaciones.forEach((cotizacion, index) => {
+                historyHTML += `
+                    <div class="history-item">
+                        <div class="history-details">
+                            <div class="history-date">${cotizacion.fecha}</div>
+                            <div class="history-desc">${cotizacion.cantidad} x ${cotizacion.tipo}</div>
+                        </div>
+                        <div class="history-actions">
+                            <div style="margin-right: 10px; font-weight: 600;">${cotizacion.total}</div>
+                            <button class="history-action-btn" onclick="cargarCotizacionDesdeHistorial(${index})" title="Cargar">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                            <button class="history-action-btn" onclick="eliminarCotizacion(${index})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyContainer.innerHTML = historyHTML;
+        }
+        
+        function cargarCotizacionDesdeHistorial(index) {
+            const cotizacion = cotizaciones[index];
+            
+            document.getElementById('cantidad').value = cotizacion.cantidad;
+            document.getElementById('cantidad-range').value = cotizacion.cantidad;
+            document.getElementById('cantidad-value').textContent = cotizacion.cantidad;
+            
+            document.getElementById('precio').value = cotizacion.precio;
+            
+            document.getElementById('descuento').value = cotizacion.descuentoAdicional;
+            document.getElementById('descuento-range').value = cotizacion.descuentoAdicional;
+            document.getElementById('descuento-value').textContent = `${cotizacion.descuentoAdicional}%`;
+            
+            document.getElementById('iva').value = cotizacion.iva;
+            document.getElementById('iva-range').value = cotizacion.iva;
+            document.getElementById('iva-value').textContent = `${cotizacion.iva}%`;
+            
+            document.getElementById('costo-extra').value = cotizacion.costoExtra;
+            document.getElementById('envio').value = cotizacion.envio;
+            
+            document.getElementById('moneda').value = cotizacion.moneda;
+            
+            // Seleccionar el tipo de bolsa
+            const tipoBolsaSelect = document.getElementById('tipo-bolsa');
+            for (let i = 0; i < tipoBolsaSelect.options.length; i++) {
+                if (tipoBolsaSelect.options[i].value === cotizacion.precio) {
+                    tipoBolsaSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            calcular();
+            mostrarNotificación('Cotización cargada desde historial');
+        }
+        
+        function eliminarCotizacion(index) {
+            cotizaciones.splice(index, 1);
+            localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+            cargarHistorial();
+            mostrarNotificación('Cotización eliminada');
+        }
+        
+        function limpiarHistorial() {
+            if (cotizaciones.length === 0) {
+                mostrarNotificación('No hay historial para limpiar', 'warning');
+                return;
+            }
+            
+            if (confirm('¿Estás seguro de que deseas eliminar todo el historial? Esta acción no se puede deshacer.')) {
+                cotizaciones = [];
+                localStorage.removeItem('cotizaciones');
+                cargarHistorial();
+                mostrarNotificación('Historial limpiado correctamente');
+            }
+        }
+        
+        function imprimirCotizacion() {
+            window.print();
+        }
+        
+        function generarTicket() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Configuración
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 15;
+                const contentWidth = pageWidth - (margin * 2);
+                
+                // Logo y encabezado
+                doc.setFillColor(37, 99, 235);
+                doc.rect(0, 0, pageWidth, 30, 'F');
+                
+                doc.setFontSize(22);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont(undefined, 'bold');
+                doc.text("COTIZACION DE BOLSA ASFALTA YA", pageWidth / 2, 17, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont(undefined, 'normal');
+                doc.text("Ticket de Cotización", pageWidth / 2, 25, { align: 'center' });
+                
+                // Información de la empresa
+                let yPosition = 45;
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text("Empresa: Matsinsa", margin, yPosition);
+                doc.text("Teléfono: +52(844)488-1743", margin, yPosition + 5);
+                doc.text("Email: ing.ericsoto@matsinsa.com", margin, yPosition + 10);
+                doc.text("Web: www.grupomatsinsa.com", margin, yPosition + 15);
+                
+                // Fecha y número de ticket
+                const now = new Date();
+                doc.text(`Fecha: ${now.toLocaleDateString()}`, pageWidth - margin, yPosition, { align: 'right' });
+                doc.text(`Hora: ${now.toLocaleTimeString()}`, pageWidth - margin, yPosition + 5, { align: 'right' });
+                doc.text(`Ticket: #${Math.floor(100000 + Math.random() * 900000)}`, pageWidth - margin, yPosition + 10, { align: 'right' });
+                
+                yPosition += 30;
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, yPosition, pageWidth - margin, yPosition);
+                yPosition += 10;
+                
+                // Detalles de la cotización
+                doc.setFontSize(14);
+                doc.setTextColor(37, 99, 235);
+                doc.setFont(undefined, 'bold');
+                doc.text("DETALLES DE LA COTIZACIÓN", pageWidth / 2, yPosition, { align: 'center' });
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'normal');
+                
+                // Obtener valores actuales
+                const cantidad = document.getElementById('cantidad').value;
+                const tipo = document.getElementById('tipo-bolsa').options[document.getElementById('tipo-bolsa').selectedIndex].text.split(' (')[0];
+                const precio = document.getElementById('precio').value;
+                const descuentoVolumen = document.querySelector('.discount-tier.active')?.getAttribute('data-discount') || 0;
+                const descuentoAdicional = document.getElementById('descuento').value;
+                const iva = document.getElementById('iva').value;
+                const costoExtra = document.getElementById('costo-extra').value || 0;
+                const envio = document.getElementById('envio').value || 0;
+                const moneda = document.getElementById('moneda').value;
+                const simboloMoneda = obtenerSimboloMoneda(moneda);
+                const total = document.getElementById('total').textContent;
+                
+                // Información del producto
+                doc.text(`Producto: ${tipo}`, margin, yPosition);
+                doc.text(`Cantidad: ${cantidad} unidades`, margin, yPosition + 5);
+                doc.text(`Precio unitario: ${simboloMoneda}${parseFloat(precio).toFixed(2)}`, margin, yPosition + 10);
+                yPosition += 20;
+                
+                // Desglose de costos
+                doc.setFont(undefined, 'bold');
+                doc.text("DESGLOSE DE COSTOS", margin, yPosition);
+                yPosition += 7;
+                doc.setFont(undefined, 'normal');
+                
+                doc.text(`Subtotal: ${simboloMoneda}${(cantidad * precio).toFixed(2)}`, margin, yPosition);
+                doc.text(`Descuento por volumen: ${descuentoVolumen}%`, margin, yPosition + 5);
+                doc.text(`Descuento adicional: ${descuentoAdicional}%`, margin, yPosition + 10);
+                doc.text(`IVA: ${iva}%`, margin, yPosition + 15);
+                
+                if (costoExtra > 0) {
+                    doc.text(`Costos adicionales: ${simboloMoneda}${parseFloat(costoExtra).toFixed(2)}`, margin, yPosition + 20);
+                    yPosition += 5;
+                }
+                
+                if (envio > 0) {
+                    doc.text(`Envío: ${simboloMoneda}${parseFloat(envio).toFixed(2)}`, margin, yPosition + 25);
+                    yPosition += 5;
+                }
+                
+                yPosition += 30;
+                
+                // Total
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(37, 99, 235);
+                doc.text("TOTAL:", margin, yPosition);
+                doc.text(total, pageWidth - margin, yPosition, { align: 'right' });
+                
+                yPosition += 15;
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, yPosition, pageWidth - margin, yPosition);
+                yPosition += 10;
+                
+                // Información adicional
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'italic');
+                doc.text("Esta cotización es válida por 15 días a partir de la fecha de emisión.", pageWidth / 2, yPosition, { align: 'center' });
+                yPosition += 5;
+                doc.text("Los precios no incluyen costos adicionales no especificados.", pageWidth / 2, yPosition, { align: 'center' });
+                yPosition += 5;
+                doc.text("Para más información, contacte con nuestro equipo de ventas.", pageWidth / 2, yPosition, { align: 'center' });
+                
+                // Pie de página
+                yPosition = doc.internal.pageSize.getHeight() - 20;
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, yPosition, pageWidth - margin, yPosition);
+                yPosition += 5;
+                
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'normal');
+                doc.text("¡Gracias por su preferencia!", pageWidth / 2, yPosition, { align: 'center' });
+                
+                // Guardar el PDF
+                doc.save(`ticket_cotizacion_${Date.now()}.pdf`);
+                mostrarNotificación('Ticket generado correctamente');
+            } catch (error) {
+                console.error('Error al generar el ticket:', error);
+                mostrarNotificación('Error al generar el ticket', 'error');
+            }
+        }
+        
+        function exportarPDF() {
+            if (cotizaciones.length === 0) {
+                mostrarNotificación('No hay cotizaciones para exportar', 'warning');
+                return;
+            }
+            
+            try {
+                // Usar jsPDF para generar el PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Título
+                doc.setFontSize(20);
+                doc.setTextColor(40);
+                doc.text('Historial de Cotizaciones - Cotizador de Bolsas', 15, 15);
+                
+                // Fecha de exportación
+                doc.setFontSize(12);
+                doc.setTextColor(100);
+                doc.text(`Exportado el: ${new Date().toLocaleString()}`, 15, 25);
+                
+                // Encabezados de tabla
+                const headers = [['Fecha', 'Cantidad', 'Tipo', 'Precio', 'Descuento', 'IVA', 'Total']];
+                const data = cotizaciones.map(cot => [
+                    cot.fecha,
+                    `${cot.cantidad} uds`,
+                    cot.tipo.split(' (')[0],
+                    `$${cot.precio}`,
+                    `${cot.descuentoAdicional}%`,
+                    `${cot.iva}%`,
+                    cot.total
+                ]);
+                
+                // Generar tabla
+                doc.autoTable({
+                    head: headers,
+                    body: data,
+                    startY: 35,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [37, 99, 235],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [240, 240, 240]
+                    }
+                });
+                
+                // Guardar PDF
+                doc.save('historial_cotizaciones_bolsas.pdf');
+                mostrarNotificación('PDF exportado correctamente');
+            } catch (error) {
+                console.error('Error al exportar PDF:', error);
+                mostrarNotificación('Error al exportar PDF', 'error');
+            }
+        }
+        
+        function exportarExcel() {
+            if (cotizaciones.length === 0) {
+                mostrarNotificación('No hay cotizaciones para exportar', 'warning');
+                return;
+            }
+            
+            try {
+                // Preparar datos para Excel
+                const data = cotizaciones.map(cot => ({
+                    'Fecha': cot.fecha,
+                    'Cantidad': cot.cantidad,
+                    'Tipo': cot.tipo.split(' (')[0],
+                    'Precio Unitario': `$${cot.precio}`,
+                    'Descuento (%)': `${cot.descuentoAdicional}%`,
+                    'IVA (%)': `${cot.iva}%`,
+                    'Costos Extra': cot.costoExtra ? `$${cot.costoExtra}` : '$0',
+                    'Envío': cot.envio ? `$${cot.envio}` : '$0',
+                    'Total': cot.total
+                }));
+                
+                // Crear hoja de trabajo
+                const ws = XLSX.utils.json_to_sheet(data);
+                
+                // Ajustar anchos de columnas
+                const wscols = [
+                    { wch: 20 }, // Fecha
+                    { wch: 10 }, // Cantidad
+                    { wch: 20 }, // Tipo
+                    { wch: 15 }, // Precio
+                    { wch: 12 }, // Descuento
+                    { wch: 10 }, // IVA
+                    { wch: 15 }, // Costos Extra
+                    { wch: 10 }, // Envío
+                    { wch: 15 }  // Total
+                ];
+                ws['!cols'] = wscols;
+                
+                // Crear libro de trabajo
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Cotizaciones');
+                
+                // Exportar a Excel
+                XLSX.writeFile(wb, 'historial_cotizaciones_bolsas.xlsx');
+                mostrarNotificación('Excel exportado correctamente');
+            } catch (error) {
+                console.error('Error al exportar Excel:', error);
+                mostrarNotificación('Error al exportar Excel', 'error');
+            }
+        }
+        
+        function exportarJSON() {
+            if (cotizaciones.length === 0) {
+                mostrarNotificación('No hay cotizaciones para exportar', 'warning');
+                return;
+            }
+            
+            try {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cotizaciones, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "historial_cotizaciones_bolsas.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                mostrarNotificación('JSON exportado correctamente');
+            } catch (error) {
+                console.error('Error al exportar JSON:', error);
+                mostrarNotificación('Error al exportar JSON', 'error');
+            }
+        }
+        
+        function mostrarNotificación(mensaje, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notification.className = 'notification';
+            notification.classList.add(tipo);
+            
+            let icon = 'fa-check-circle';
+            if (tipo === 'warning') icon = 'fa-exclamation-triangle';
+            if (tipo === 'error') icon = 'fa-exclamation-circle';
+            
+            notification.innerHTML = `<i class="fas ${icon}"></i> <span id="notification-text">${mensaje}</span>`;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
